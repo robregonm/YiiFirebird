@@ -302,6 +302,19 @@ class CFirebirdSchema extends CDbSchema
 	}
         
 	/**
+	 * Builds a SQL statement for dropping a DB column.
+	 * @param string $table the table whose column is to be dropped. The name will be properly quoted by the method.
+	 * @param string $column the name of the column to be dropped. The name will be properly quoted by the method.
+	 * @return string the SQL statement for dropping a DB column.
+	 * @since 1.1.6
+	 */
+	public function dropColumn($table, $column)
+	{
+		return "ALTER TABLE ".$this->quoteTableName($table)
+			." DROP ".$this->quoteColumnName($column);
+	}
+
+	/**
 	* Builds a SQL statement for renaming a column.
 	* @param string $table the table whose column is to be renamed. The name will be properly quoted by the method.
 	* @param string $name the old name of the column. The name will be properly quoted by the method.
