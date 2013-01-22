@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CFirebirdConnection class file.
  *
@@ -15,4 +16,7 @@ class CFirebirdConnection extends CDbConnection
     public $driverMap = array(
         'firebird' => 'CFirebirdConnection', // Informix driver
     );
+
+    public $pdoClass = 'CFirebirdPdoAdapter';
+
 }
