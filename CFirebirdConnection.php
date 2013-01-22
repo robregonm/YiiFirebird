@@ -20,7 +20,7 @@ class CFirebirdConnection extends CDbConnection
      * @since 1.1.6
      */
     public $driverMap = array(
-        'firebird' => 'CFirebirdConnection', // Firebird driver
+        'firebird' => 'CFirebirdSchema', // Firebird driver
     );
 
     /**
