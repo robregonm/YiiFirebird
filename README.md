@@ -10,7 +10,7 @@ idlesign. It has been enhanced and tested with gii from yii 1.1.9.
 php 5.3.10 is required. Previous versions of PDO_Firebird do
 not return the number of rows affected by a dml statement.
 
-This version is marked 0.8 
+This version is marked 1.0
 
 
 Summary of new features and fixes
@@ -47,10 +47,15 @@ Installation
   'components' => array(
   ...
     'db' => array(
-      'connectionString'=>'firebird:dbname=localhost:C:\DataBase\NetSchool\DB\MAIN30.GDB',
+      'connectionString'=>'firebird:dbname=localhost:C:\Path\To\Db\MyDB.GDB',
       'class' => 'ext.YiiFirebird.CFirebirdConnection',
     ),
     ...
   ),
 ...
 ```
+
+Thanks to
+=========
+
+@idlesign, @edgardmessias, @mr-rfh
