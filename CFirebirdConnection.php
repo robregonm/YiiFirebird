@@ -11,12 +11,22 @@
  *
  * @author Edgard Messias <edgardmessias@gmail.com>
  */
-class CFirebirdConnection extends CDbConnection
+class CFirebirdConnection extends CDbConnection 
 {
+
+    /**
+     * @var array mapping between PDO driver and schema class name.
+     * A schema class can be specified using path alias.
+     * @since 1.1.6
+     */
     public $driverMap = array(
-        'firebird' => 'CFirebirdConnection', // Informix driver
+        'firebird' => 'CFirebirdConnection', // Firebird driver
     );
 
+    /**
+     * @var string Custom PDO wrapper class.
+     * @since 1.1.8
+     */
     public $pdoClass = 'CFirebirdPdoAdapter';
 
 }
