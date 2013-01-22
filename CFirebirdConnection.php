@@ -13,6 +13,16 @@
 class CFirebirdConnection extends CDbConnection
 {
     public $driverMap = array(
-        'firebird' => 'CFirebirdConnection', // Informix driver
+        'firebird' => 'CFirebirdSchema', // Informix driver
     );
+    
+    /**
+	  * Overritde to force use of Firebird PDO Adapter.
+    * Finally call parent init.
+    */    
+    public function init()
+    {
+      $this->pdoClass = "CFirebirdPdoAdapter";
+      parent::init();
+    }        
 }
