@@ -47,7 +47,7 @@ Installation
   'components' => array(
   ...
     'db' => array(
-      'connectionString' => 'connectionString'=>'firebird:dbname=localhost:C:\DataBase\NetSchool\DB\MAIN30.GDB',
+      'connectionString'=>'firebird:dbname=localhost:C:\DataBase\NetSchool\DB\MAIN30.GDB',
       'class' => 'ext.YiiFirebird.CFirebirdConnection',
     ),
     ...
