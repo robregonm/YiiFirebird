@@ -16,25 +16,26 @@
  */
 class CFirebirdSchema extends CDbSchema
 {
-    /**
-     * @var array the abstract column types mapped to physical column types.
-     * @since 1.1.11
-     */
-    public $columnTypes=array(
-        'pk' => 'INTEGER NOT NULL PRIMARY KEY',
-        'string' => 'VARCHAR(255)',
-        'text' => 'BLOB SUB_TYPE TEXT',
-        'integer' => 'INTEGER',
-        'float' => 'float',
-        'decimal' => 'DECIMAL',
-        'datetime' => 'TIMESTAMP',
-        'timestamp' => 'TIMESTAMP',
-        'time' => 'TIME',
-        'date' => 'DATE',
-        'binary' => 'BLOB',
-        'boolean' => 'SMALLINT',
-        'money' => 'DECIMAL(19,4)',
-    );
+
+	/**
+	 * @var array the abstract column types mapped to physical column types.
+	 * @since 1.1.11
+	 */
+	public $columnTypes = array(
+	    'pk' => 'INTEGER NOT NULL PRIMARY KEY',
+	    'string' => 'VARCHAR(255)',
+	    'text' => 'BLOB SUB_TYPE TEXT',
+	    'integer' => 'INTEGER',
+	    'float' => 'float',
+	    'decimal' => 'DECIMAL',
+	    'datetime' => 'TIMESTAMP',
+	    'timestamp' => 'TIMESTAMP',
+	    'time' => 'TIME',
+	    'date' => 'DATE',
+	    'binary' => 'BLOB',
+	    'boolean' => 'SMALLINT',
+	    'money' => 'DECIMAL(19,4)',
+	);
 
 	/**
 	 * Quotes a table name for use in a query.
@@ -160,11 +161,12 @@ class CFirebirdSchema extends CDbSchema
 	protected function findColumns($table)
 	{
 		// Zoggo - Converted sql to use join syntax
-        // robregonm - Added isAutoInc
+		// robregonm - Added isAutoInc
 		$sql = 'SELECT
                     rel.rdb$field_name AS fname,
                     rel.rdb$default_source AS fdefault,
-                    tps.rdb$type_name AS ftype,
+                    fld.rdb$field_type AS fcodtype,
+                    fld.rdb$field_sub_type AS fcodsubtype,
                     fld.rdb$field_length AS flength,
                     fld.rdb$field_scale AS fscale,
                     fld.rdb$field_precision AS fprecision,
@@ -181,9 +183,7 @@ class CFirebirdSchema extends CDbSchema
                 FROM
           rdb$relation_fields rel
           join rdb$fields fld on rel.rdb$field_source=fld.rdb$field_name
-          join rdb$types tps on fld.rdb$field_type=tps.rdb$type
         WHERE rel.rdb$relation_name=upper(\'' . $table->name . '\')
-            AND tps.rdb$field_name=\'RDB$FIELD_TYPE\'
         ORDER BY rel.rdb$field_position;';
 		try
 		{
@@ -247,15 +247,83 @@ class CFirebirdSchema extends CDbSchema
 		$c->size = (int) $column['flength'];
 		$c->scale = (int) $column['fscale'];
 		$c->precision = (int) $column['fprecision'];
-        $c->autoIncrement = $column['fautoinc']==='1';
-        $defaultValue = null;
-        if(!empty($column['fdefault']))
-		    $defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
-        if($defaultValue===null)
-            $defaultValue = $column['fdefault_value'];
-        if($defaultValue=='CURRENT_TIMESTAMP')
-            $defaultValue = null;
-		$c->init(rtrim($column['ftype']), $defaultValue);
+		$c->autoIncrement = $column['fautoinc'] === '1';
+		$defaultValue = null;
+		if (!empty($column['fdefault']))
+			$defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
+		if ($defaultValue === null)
+			$defaultValue = $column['fdefault_value'];
+		if ($defaultValue == 'CURRENT_TIMESTAMP')
+			$defaultValue = null;
+
+		$type = "";
+
+		$baseTypes = array(
+		    7 => 'SMALLINT',
+		    8 => 'INTEGER',
+		    16 => 'INT64',
+		    9 => 'QUAD',
+		    10 => 'FLOAT',
+		    11 => 'D_FLOAT',
+		    17 => 'BOOLEAN',
+		    27 => 'DOUBLE',
+		    12 => 'DATE',
+		    13 => 'TYME',
+		    35 => 'TIMESTAMP',
+		    261 => 'BLOB',
+		    37 => 'VARCHAR',
+		    14 => 'CHAR',
+		    40 => 'CSTRING',
+		    45 => 'BLOB_ID',
+		);
+
+		if (array_key_exists((int) $column['fcodtype'], $baseTypes))
+		{
+			$type = $baseTypes[(int) $column['fcodtype']];
+		}
+
+		switch ((int) $column['fcodtype']) {
+			case 7:
+			case 8:
+				switch ((int) $column['fcodsubtype']) {
+					case 1:
+						$type = 'NUMERIC';
+						break;
+					case 2:
+						$type = 'DECIMAL';
+						break;
+				}
+				break;
+			case 9:
+				switch ((int) $column['fcodsubtype']) {
+					case 1:
+						$type = 'NUMERIC';
+						break;
+					case 2:
+						$type = 'DECIMAL';
+						break;
+					default :
+						$type = 'BIGINT';
+						break;
+				}
+				break;
+			case 261:
+				switch ((int) $column['fcodsubtype']) {
+					case 1:
+						$type = 'TEXT';
+						break;
+					case 2:
+						$type = 'BLR';
+						break;
+					case 3:
+						$type = 'ACL';
+						break;
+				}
+				break;
+		}
+
+
+		$c->init(rtrim($type), $defaultValue);
 
 		return $c;
 	}
@@ -266,7 +334,7 @@ class CFirebirdSchema extends CDbSchema
 	 * @param string the schema of the tables. Defaults to empty string, meaning the current or default schema.
 	 * @return array all table names in the database.
 	 */
-	protected function findTableNames($schema='')
+	protected function findTableNames($schema = '')
 	{
 		$sql = 'SELECT
                     rdb$relation_name
@@ -300,7 +368,7 @@ class CFirebirdSchema extends CDbSchema
 	{
 		return new CFirebirdCommandBuilder($this);
 	}
-        
+
 	/**
 	 * Builds a SQL statement for dropping a DB column.
 	 * @param string $table the table whose column is to be dropped. The name will be properly quoted by the method.
@@ -310,23 +378,24 @@ class CFirebirdSchema extends CDbSchema
 	 */
 	public function dropColumn($table, $column)
 	{
-		return "ALTER TABLE ".$this->quoteTableName($table)
-			." DROP ".$this->quoteColumnName($column);
+		return "ALTER TABLE " . $this->quoteTableName($table)
+			. " DROP " . $this->quoteColumnName($column);
 	}
 
 	/**
-	* Builds a SQL statement for renaming a column.
-	* @param string $table the table whose column is to be renamed. The name will be properly quoted by the method.
-	* @param string $name the old name of the column. The name will be properly quoted by the method.
-	* @param string $newName the new name of the column. The name will be properly quoted by the method.
-	* @return string the SQL statement for renaming a DB column.
-	*/
-	public function renameColumn($table, $name, $newName) {
-		return "ALTER TABLE " . $this->quoteTableName($table) . 
+	 * Builds a SQL statement for renaming a column.
+	 * @param string $table the table whose column is to be renamed. The name will be properly quoted by the method.
+	 * @param string $name the old name of the column. The name will be properly quoted by the method.
+	 * @param string $newName the new name of the column. The name will be properly quoted by the method.
+	 * @return string the SQL statement for renaming a DB column.
+	 */
+	public function renameColumn($table, $name, $newName)
+	{
+		return "ALTER TABLE " . $this->quoteTableName($table) .
 			" ALTER " . $this->quoteColumnName($name)
 			. " TO " . $this->quoteColumnName($newName);
 	}
-	
+
 	/**
 	 * Builds a SQL statement for changing the definition of a column.
 	 * @param string $table the table whose column is to be changed. The table name will be properly quoted by the method.
@@ -339,8 +408,8 @@ class CFirebirdSchema extends CDbSchema
 	 */
 	public function alterColumn($table, $column, $type)
 	{
-		return 'ALTER TABLE ' . $this->quoteTableName($table) 
-                        . ' ALTER ' . $this->quoteColumnName($column) . ' '
+		return 'ALTER TABLE ' . $this->quoteTableName($table)
+			. ' ALTER ' . $this->quoteColumnName($column) . ' '
 			. ' TYPE ' . $this->getColumnType($type);
 	}
 
