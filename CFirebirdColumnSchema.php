@@ -15,23 +15,15 @@
  */
 class CFirebirdColumnSchema extends CDbColumnSchema
 {
-    private $DEFAULTS_DATETIME = array(
-        '\'CURRENT_DATE\'',
-        '\'CURRENT_TIME\'',
-        '\'CURRENT_TIMESTAMP\'',
-        '\'NOW\'',
-        '\'TODAY\'',
-        '\'TOMORROW\'',
-        '\'YESTERDAY\'',
-    );
-
-    /**
-     * Extracts the PHP type from DB type.
-     * @param string DB type
-     */
-    protected function extractType($dbType)
-    {
-        // @todo Need to handle more data types here.
+        private $DEFAULTS_DATETIME = array(
+            '\'CURRENT_DATE\'',
+            '\'CURRENT_TIME\'',
+            '\'CURRENT_TIMESTAMP\'',
+            '\'NOW\'',
+            '\'TODAY\'',
+            '\'TOMORROW\'',
+            '\'YESTERDAY\'',
+        );
 
 	/**
 	 * Extracts the PHP type from DB type.
@@ -50,38 +42,23 @@ class CFirebirdColumnSchema extends CDbColumnSchema
 			$this->type='string';
 	}
 
-	/**
-	 * Extracts the default value for the column.
-	 * The value is typecasted to correct PHP type.
-	 * @param mixed the default value obtained from metadata
-	 */
-	protected function extractDefault($defaultValue)
-	{
-		if (($this->dbType === 'TIMESTAMP' && $defaultValue === 'CURRENT_TIMESTAMP'))
-			$this->defaultValue = null;
-		else if ($defaultValue == "''")
-			$this->defaultValue = '';
-		else
-			parent::extractDefault($defaultValue);
-	}
+        /**
+         * Extracts the default value for the column.
+         * The value is typecasted to correct PHP type.
+         * @param mixed the default value obtained from metadata
+         */
+        protected function extractDefault($defaultValue)
+        {
+                $defaultValue = strtoupper($defaultValue);
 
-    /**
-     * Extracts the default value for the column.
-     * The value is typecasted to correct PHP type.
-     * @param mixed the default value obtained from metadata
-     */
-    protected function extractDefault($defaultValue)
-    {
-        $defaultValue = strtoupper($defaultValue);
-
-        if(in_array($this->dbType, array('DATE', 'TIME', 'TIMESTAMP')) &&
-            (in_array($defaultValue, $this->DEFAULTS_DATETIME) ||
-            in_array("'$defaultValue'", $this->DEFAULTS_DATETIME)))
-            $this->defaultValue=null;
-        elseif($defaultValue== "''")
-            $this->defaultValue='';
-        else
-            parent::extractDefault($defaultValue);
-    }
+                if(in_array($this->dbType, array('DATE', 'TIME', 'TIMESTAMP')) &&
+                        (in_array($defaultValue, $this->DEFAULTS_DATETIME) ||
+                        in_array("'$defaultValue'", $this->DEFAULTS_DATETIME)))
+                        $this->defaultValue=null;
+                elseif($defaultValue== "''")
+                        $this->defaultValue='';
+                else
+                    parent::extractDefault($defaultValue);
+        }
  
 }

@@ -253,8 +253,6 @@ class CFirebirdSchema extends CDbSchema
 			$defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
 		if ($defaultValue === null)
 			$defaultValue = $column['fdefault_value'];
-		if ($defaultValue == 'CURRENT_TIMESTAMP')
-			$defaultValue = null;
 
 		$type = "";
 
