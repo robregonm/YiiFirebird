@@ -247,14 +247,15 @@ class CFirebirdSchema extends CDbSchema
 		$c->size = (int) $column['flength'];
 		$c->scale = (int) $column['fscale'];
 		$c->precision = (int) $column['fprecision'];
-        $c->autoIncrement = $column['fautoinc']==='1';
-        $defaultValue = null;
-        if(!empty($column['fdefault']))
-		    $defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
-        if($defaultValue===null)
-            $defaultValue = $column['fdefault_value'];
-        if($defaultValue=='CURRENT_TIMESTAMP')
-            $defaultValue = null;
+		$c->autoIncrement = $column['fautoinc']==='1';
+		$defaultValue = null;
+
+		if(!empty($column['fdefault']))
+			$defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
+
+		if($defaultValue===null)
+			$defaultValue = $column['fdefault_value'];
+
 		$c->init(rtrim($column['ftype']), $defaultValue);
 
 		return $c;
