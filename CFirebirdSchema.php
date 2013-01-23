@@ -294,7 +294,7 @@ class CFirebirdSchema extends CDbSchema
 						break;
 				}
 				break;
-			case 9:
+			case 16:
 				switch ((int) $column['fcodsubtype']) {
 					case 1:
 						$type = 'NUMERIC';
