@@ -268,7 +268,7 @@ class CFirebirdSchema extends CDbSchema
 		    17 => 'BOOLEAN',
 		    27 => 'DOUBLE',
 		    12 => 'DATE',
-		    13 => 'TYME',
+		    13 => 'TIME',
 		    35 => 'TIMESTAMP',
 		    261 => 'BLOB',
 		    37 => 'VARCHAR',

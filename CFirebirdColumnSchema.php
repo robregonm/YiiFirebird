@@ -23,7 +23,14 @@ class CFirebirdColumnSchema extends CDbColumnSchema
 	protected function extractType($dbType)
 	{
 		// @todo Need to handle more data types here.
-		parent::extractType($dbType);
+		if(stripos($dbType,'int')!==false && stripos($dbType,'unsigned int')===false)
+			$this->type='integer';
+		elseif(stripos($dbType,'bool')!==false)
+			$this->type='boolean';
+		elseif(preg_match('/(numeric|decimal|floa|doub)/i',$dbType))
+			$this->type='double';
+		else
+			$this->type='string';
 	}
 
 	/**
