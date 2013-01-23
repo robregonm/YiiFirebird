@@ -14,6 +14,16 @@
  */
 class CFirebirdColumnSchema extends CDbColumnSchema
 {
+    private $DEFAULTS_DATETIME = array(
+        '\'CURRENT_DATE\'',
+        '\'CURRENT_TIME\'',
+        '\'CURRENT_TIMESTAMP\'',
+        '\'NOW\'',
+        '\'TODAY\'',
+        '\'TOMORROW\'',
+        '\'YESTERDAY\'',
+    );
+
     /**
      * Extracts the PHP type from DB type.
      * @param string DB type
@@ -35,9 +45,13 @@ class CFirebirdColumnSchema extends CDbColumnSchema
      */
     protected function extractDefault($defaultValue)
     {
-        if(($this->dbType==='TIMESTAMP' && $defaultValue==='CURRENT_TIMESTAMP'))
+        $defaultValue = strtoupper($defaultValue);
+
+        if(in_array($this->dbType, array('DATE', 'TIME', 'TIMESTAMP')) &&
+            (in_array($defaultValue, $this->DEFAULTS_DATETIME) ||
+            in_array("'$defaultValue'", $this->DEFAULTS_DATETIME)))
             $this->defaultValue=null;
-        else if($defaultValue== "''")
+        elseif($defaultValue== "''")
             $this->defaultValue='';
         else
             parent::extractDefault($defaultValue);
