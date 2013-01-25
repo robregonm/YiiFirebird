@@ -17,16 +17,16 @@ Summary of new features and fixes
 ==============================================
 
 FirebirdSchema
-o Forced all metadata objects to lowercase for compatibility with gii
-o Changed system table queries to use JOINS instead of WHERE conditions.
+* Forced all metadata objects to lowercase for compatibility with gii
+* Changed system table queries to use JOINS instead of WHERE conditions.
    This is partly a matter of style but WHERE joins are deprecated.
 
 FirebirdCommandBuilder
-o Added public $returnID for use with INSERT ... RETURNING ...
-o Added getLastInsertID
-o Added createInsertCommand
-o Added createUpdateCommand
-o Fixed applyLImit to correctly handle all variations of $limit and $offset
+* Added public $returnID for use with INSERT ... RETURNING ...
+* Added getLastInsertID
+* Added createInsertCommand
+* Added createUpdateCommand
+* Fixed applyLImit to correctly handle all variations of $limit and $offset
 
 
 Installation

@@ -15,6 +15,7 @@
  */
 class CFirebirdCommandBuilder extends CDbCommandBuilder
 {
+
     /**
      * Alters the SQL to apply LIMIT and OFFSET.
      *
@@ -51,7 +52,7 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
         // from $offset. In Firebird this can only be done with SKIP
         if ($offset >= 0 && $limit < 0) {
             $count = 1; //Only do it once
-            $sql = preg_replace('/^SELECT /i', 'SELECT SKIP ' . (int)$offset . ' ', $sql, $count);
+            $sql = preg_replace('/^SELECT /i', 'SELECT SKIP ' . (int) $offset . ' ', $sql, $count);
             return $sql;
         }
 
@@ -59,7 +60,7 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
         // ie, return the first $limit rows in the set.
         if ($offset < 0 && $limit >= 0) {
             $rows = $limit;
-            $sql .= ' ROWS ' . (int)$rows;
+            $sql .= ' ROWS ' . (int) $rows;
             return $sql;
         }
 
@@ -68,11 +69,11 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
 
             // calculate $rows for ROWS...
             $rows = $offset + 1;
-            $sql .= ' ROWS ' . (int)$rows;
+            $sql .= ' ROWS ' . (int) $rows;
 
             // calculate $to for TO...
             $to = $offset + $limit;
-            $sql .= ' TO ' . (int)$to;
+            $sql .= ' TO ' . (int) $to;
 
             return $sql;
         }
@@ -81,6 +82,5 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
         // the sql back.
         return $sql;
     }
-
 
 }
