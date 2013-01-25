@@ -11,9 +11,8 @@
  *
  * @author Edgard Messias <edgardmessias@gmail.com>
  */
-class CFirebirdConnection extends CDbConnection 
+class CFirebirdConnection extends CDbConnection
 {
-
     /**
      * @var array mapping between PDO driver and schema class name.
      * A schema class can be specified using path alias.

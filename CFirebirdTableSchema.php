@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CFirebirdTableSchema class file.
  *
@@ -12,4 +13,5 @@
  */
 class CFirebirdTableSchema extends CDbTableSchema
 {
+    
 }
