@@ -14,6 +14,7 @@
  */
 class CFirebirdPdoAdapter extends PDO
 {
+    private $inTransaction = false;
 
     /**
      * Do some basic setup for Firebird.
@@ -37,6 +38,60 @@ class CFirebirdPdoAdapter extends PDO
         // ensure we only receive fieldname not tablename.fieldname.
         $driver_options[PDO::ATTR_FETCH_TABLE_NAMES] = FALSE;
         parent::__construct($dsn, $username, $password, $driver_options);
+    }
+
+    /**
+     * Initiates a transaction
+     * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
+     */
+    public function beginTransaction()
+    {
+        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, false);
+        $r = $this->exec("SET TRANSACTION");
+        $success = ($r !== false);
+        if ($success) {
+            $this->inTransaction = true;
+        }
+        return ($success);
+    }
+
+    /**
+     * Commits a transaction
+     * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
+     */
+    public function commit()
+    {
+        $r = $this->exec("COMMIT");
+        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, true);
+        $success = ($r !== false);
+        if ($success) {
+            $this->inTransaction = false;
+        }
+        return ($success);
+    }
+
+    /**
+     * Rolls back a transaction
+     * @return bool <b>TRUE</b> on success or <b>FALSE</b> on failure.
+     */
+    public function rollBack()
+    {
+        $r = $this->exec("ROLLBACK");
+        $this->setAttribute(PDO::ATTR_AUTOCOMMIT, true);
+        $success = ($r !== false);
+        if ($success) {
+            $this->inTransaction = false;
+        }
+        return ($success);
+    }
+
+	/**
+	 * Checks if inside a transaction
+	 * @return bool <b>TRUE</b> if a transaction is currently active, and <b>FALSE</b> if not.
+	 */
+    public function inTransaction()
+    {
+        return $this->inTransaction;
     }
 
 }
