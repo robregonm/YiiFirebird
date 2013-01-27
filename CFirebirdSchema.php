@@ -185,6 +185,9 @@ class CFirebirdSchema extends CDbSchema
                     rel.rdb$field_position;';
         try {
             $columns = $this->getDbConnection()->createCommand($sql)->queryAll();
+            if (!$columns) {
+                return false;
+            }
         } catch (Exception $e) {
             return false;
         }
@@ -216,8 +219,7 @@ class CFirebirdSchema extends CDbSchema
                     $table->primaryKey[] = $c->name;
             }
         }
-
-        return true;
+        return (count($table->columns) > 0);
     }
 
     /**
