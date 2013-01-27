@@ -304,12 +304,6 @@ class CFirebirdSchema extends CDbSchema
                     case 1:
                         $type = 'TEXT';
                         break;
-                    case 2:
-                        $type = 'BLR';
-                        break;
-                    case 3:
-                        $type = 'ACL';
-                        break;
                 }
                 break;
         }
