@@ -40,6 +40,16 @@ class CFirebirdColumnSchema extends CDbColumnSchema
             $this->type = 'boolean';
         } elseif (preg_match('/(numeric|decimal|floa|doub)/i', $dbType)) {
             $this->type = 'double';
+        } elseif (stripos($dbType, 'timestamp') !== false) {
+            $this->type = 'timestamp';
+        } elseif (stripos($dbType, 'date') !== false) {
+            $this->type = 'date';
+        } elseif (stripos($dbType, 'time') !== false) {
+            $this->type = 'time';
+        } elseif (stripos($dbType, 'text') !== false) {
+            $this->type = 'text';
+        } elseif (stripos($dbType, 'blob') !== false) {
+            $this->type = 'binary';
         } else {
             $this->type = 'string';
         }

@@ -199,12 +199,13 @@ class CFirebirdSchema extends CDbSchema
                 WHERE rc.rdb$constraint_type=\'PRIMARY KEY\'
 					AND rc.rdb$relation_name=upper(\'' . $table->name . '\')';
         try {
-            $primary = $this->getDbConnection()->createCommand($sql)->queryRow();
+            $pkeys = $this->getDbConnection()->createCommand($sql)->queryColumn();
         } catch (Exception $e) {
             return false;
         }
+        $pkeys = array_map("rtrim", $pkeys);
         foreach ($columns as $key => $column) {
-            $columns[$key]['fprimary'] = rtrim($column['fname']) == rtrim($primary['fname']) ? true : false;
+            $columns[$key]['fprimary'] = in_array(rtrim($column['fname']), $pkeys);
         }
 
         foreach ($columns as $column) {
@@ -303,12 +304,6 @@ class CFirebirdSchema extends CDbSchema
                 switch ((int) $column['fcodsubtype']) {
                     case 1:
                         $type = 'TEXT';
-                        break;
-                    case 2:
-                        $type = 'BLR';
-                        break;
-                    case 3:
-                        $type = 'ACL';
                         break;
                 }
                 break;
