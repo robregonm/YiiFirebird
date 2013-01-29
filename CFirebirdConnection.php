@@ -29,3 +29,17 @@ class CFirebirdConnection extends CDbConnection
     public $pdoClass = 'CFirebirdPdoAdapter';
 
 }
+
+/**
+ * Auto Import
+ * No need to add to main.php:
+ * 'import'=>array(
+ *  ...
+ *  'ext.YiiFirebird.*',
+ *  ...
+ * ),
+ */
+$dir = dirname(__FILE__);
+$alias = md5($dir);
+Yii::setPathOfAlias($alias, $dir);
+Yii::import($alias . '.*');
