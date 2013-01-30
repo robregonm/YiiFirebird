@@ -244,7 +244,14 @@ class CFirebirdSchema extends CDbSchema
         $c->autoIncrement = $column['fautoinc'] === '1';
         $defaultValue = null;
         if (!empty($column['fdefault'])) {
-            $defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
+
+            // remove whitespace, 'DEFAULT ' prefix and surrounding single quotes; all optional
+            if(preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
+                $defaultValue = array_pop($parts);
+            }
+
+            // handle escaped single quotes like in "funny''quoted''string"
+            $defaultValue = str_replace('\'\'', '\'', $defaultValue);
         }
         if ($defaultValue === null) {
             $defaultValue = $column['fdefault_value'];
