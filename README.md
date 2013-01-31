@@ -37,6 +37,7 @@ FirebirdSchema
    This is partly a matter of style but WHERE joins are deprecated.
 * Support of composite primary keys
 * Fixed 'find Columns' do 'CFirebirdSchema' that always returns true, even if the table does not exist.
+* Added support for Alter column from NULL to NOT NULL and vice versa
 
 
 FirebirdCommandBuilder
