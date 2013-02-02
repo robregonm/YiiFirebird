@@ -244,7 +244,14 @@ class CFirebirdSchema extends CDbSchema
         $c->autoIncrement = $column['fautoinc'] === '1';
         $defaultValue = null;
         if (!empty($column['fdefault'])) {
-            $defaultValue = str_ireplace('DEFAULT ', '', trim($column['fdefault']));
+
+            // remove whitespace, 'DEFAULT ' prefix and surrounding single quotes; all optional
+            if(preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
+                $defaultValue = array_pop($parts);
+            }
+
+            // handle escaped single quotes like in "funny''quoted''string"
+            $defaultValue = str_replace('\'\'', '\'', $defaultValue);
         }
         if ($defaultValue === null) {
             $defaultValue = $column['fdefault_value'];
@@ -391,9 +398,40 @@ class CFirebirdSchema extends CDbSchema
      */
     public function alterColumn($table, $column, $type)
     {
-        return 'ALTER TABLE ' . $this->quoteTableName($table)
+        $tableSchema = $this->getTable($table);
+        $columnSchema = $tableSchema->getColumn(strtolower(rtrim($column)));
+
+        $allowNullNewType = !preg_match("/not +null/i", $type);
+
+        $type = preg_replace("/ +(not)? *null/i", "", $type);
+
+        $baseSql = 'ALTER TABLE ' . $this->quoteTableName($table)
                 . ' ALTER ' . $this->quoteColumnName($column) . ' '
                 . ' TYPE ' . $this->getColumnType($type);
+
+
+        if ($columnSchema->allowNull == $allowNullNewType) {
+            return $baseSql;
+        } else {
+            $sql = 'EXECUTE BLOCK AS BEGIN'
+                    . ' EXECUTE STATEMENT \'' . trim($baseSql, ';') . '\';'
+                    . ' UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ' . ($allowNullNewType ? 'NULL' : '1')
+                    . ' WHERE RDB$FIELD_NAME = UPPER(\'' . $column . '\') AND RDB$RELATION_NAME = UPPER(\'' . $table . '\');';
+
+            /**
+             * In any case (whichever option you choose), make sure that the column doesn't have any NULLs.
+             * Firebird will not check it for you. Later when you backup the database, everything is fine, 
+             * but restore will fail as the NOT NULL column has NULLs in it. To be safe, each time you change from NULL to NOT NULL.
+             */
+            if (!$allowNullNewType) {
+                $sql .= ' UPDATE ' . $this->quoteTableName($table) . ' SET ' . $this->quoteColumnName($column) . ' = 0'
+                        . ' WHERE ' . $this->quoteColumnName($column) . ' IS NULL;';
+            }
+            $sql .= ' END';
+
+            return $sql;
+        }
     }
 
 }
+

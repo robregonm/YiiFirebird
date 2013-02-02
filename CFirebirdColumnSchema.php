@@ -17,16 +17,6 @@
  */
 class CFirebirdColumnSchema extends CDbColumnSchema
 {
-    private $DEFAULTS_DATETIME = array(
-        '\'CURRENT_DATE\'',
-        '\'CURRENT_TIME\'',
-        '\'CURRENT_TIMESTAMP\'',
-        '\'NOW\'',
-        '\'TODAY\'',
-        '\'TOMORROW\'',
-        '\'YESTERDAY\'',
-    );
-
     /**
      * Extracts the PHP type from DB type.
      * @param string DB type
@@ -64,10 +54,23 @@ class CFirebirdColumnSchema extends CDbColumnSchema
     {
         $defaultValue = strtoupper($defaultValue);
 
-        if (in_array($this->dbType, array('DATE', 'TIME', 'TIMESTAMP')) &&
-                (in_array($defaultValue, $this->DEFAULTS_DATETIME) ||
-                in_array("'$defaultValue'", $this->DEFAULTS_DATETIME))) {
-            $this->defaultValue = null;
+        /*
+         * remove values from date/time columns with context variable
+         * as the DB should set these values when saving them
+         */
+        if($this->type === 'date' or $this->type === 'time') {
+
+            /*
+             * handle CURRENT_DATE/TIME/TIMESTAMP with optional precision
+             * @todo handle context variable 'NOW'
+             * ref. http://www.firebirdsql.org/refdocs/langrefupd25-variables.html
+             */
+            if(strpos($defaultValue, 'CURRENT_DATE') === 0 or
+               strpos($defaultValue, 'CURRENT_TIME') === 0 or
+               in_array($defaultValue, array('NULL', 'TODAY', 'TOMORROW', 'YESTERDAY'))) {
+                $this->defaultValue = null;
+            }
+
         } elseif ($defaultValue == "''") {
             $this->defaultValue = '';
         } else {
