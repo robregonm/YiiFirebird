@@ -246,7 +246,7 @@ class CFirebirdSchema extends CDbSchema
         if (!empty($column['fdefault'])) {
 
             // remove whitespace, 'DEFAULT ' prefix and surrounding single quotes; all optional
-            if(preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
+            if (preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
                 $defaultValue = array_pop($parts);
             }
 
@@ -343,7 +343,7 @@ class CFirebirdSchema extends CDbSchema
         }
 
         foreach ($tables as $key => $table) {
-            $tables[$key] = rtrim($table);
+            $tables[$key] = strtolower(rtrim($table));
         }
 
         return $tables;
