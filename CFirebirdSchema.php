@@ -246,7 +246,7 @@ class CFirebirdSchema extends CDbSchema
         if (!empty($column['fdefault'])) {
 
             // remove whitespace, 'DEFAULT ' prefix and surrounding single quotes; all optional
-            if(preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
+            if (preg_match("/\s*(DEFAULT\s+){0,1}('(.*)'|(.*))\s*/i", $column['fdefault'], $parts)) {
                 $defaultValue = array_pop($parts);
             }
 
@@ -357,6 +357,18 @@ class CFirebirdSchema extends CDbSchema
     protected function createCommandBuilder()
     {
         return new CFirebirdCommandBuilder($this);
+    }
+
+    /**
+     * Builds a SQL statement for renaming a DB table.
+     * @param string $table the table to be renamed. The name will be properly quoted by the method.
+     * @param string $newName the new table name. The name will be properly quoted by the method.
+     * @return string the SQL statement for renaming a DB table.
+     * @since 1.1.13
+     */
+    public function renameTable($table, $newName)
+    {
+        throw new CDbException('Renaming a DB table is not supported by Firebird.');
     }
 
     /**
