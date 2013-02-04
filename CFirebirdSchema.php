@@ -360,6 +360,18 @@ class CFirebirdSchema extends CDbSchema
     }
 
     /**
+     * Builds a SQL statement for renaming a DB table.
+     * @param string $table the table to be renamed. The name will be properly quoted by the method.
+     * @param string $newName the new table name. The name will be properly quoted by the method.
+     * @return string the SQL statement for renaming a DB table.
+     * @since 1.1.13
+     */
+    public function renameTable($table, $newName)
+    {
+        throw new CDbException('Renaming a DB table is not supported by Firebird.');
+    }
+
+    /**
      * Builds a SQL statement for dropping a DB column.
      * @param string $table the table whose column is to be dropped. The name will be properly quoted by the method.
      * @param string $column the name of the column to be dropped. The name will be properly quoted by the method.
