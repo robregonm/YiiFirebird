@@ -68,6 +68,12 @@ Installation
 ...
 ```
 
+Restriction
+========
+Some restrictions imposed by Database:
+* Rename tables
+* Using DDL and DML statement in the same transaction and the same table. (Ex: Create table and insert).
+
 Thanks to
 =========
 
