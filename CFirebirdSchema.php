@@ -27,7 +27,7 @@ class CFirebirdSchema extends CDbSchema
         'string' => 'VARCHAR(255)',
         'text' => 'BLOB SUB_TYPE TEXT',
         'integer' => 'INTEGER',
-        'float' => 'float',
+        'float' => 'FLOAT',
         'decimal' => 'DECIMAL',
         'datetime' => 'TIMESTAMP',
         'timestamp' => 'TIMESTAMP',
