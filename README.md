@@ -36,15 +36,11 @@ Summary of new features and fixes
 * Changed system table queries to use JOINS instead of WHERE conditions.
    This is partly a matter of style but WHERE joins are deprecated.
 * Support of composite primary keys
-* Fixed 'find Columns' do 'CFirebirdSchema' that always returns true, even if the table does not exist.
+* Fixed 'findColumns' of 'CFirebirdSchema' that always returns true, even if the table does not exist.
 * Added support for Alter column from NULL to NOT NULL and vice versa
 
 
 ####FirebirdCommandBuilder
-* Added public $returnID for use with INSERT ... RETURNING ...
-* Added getLastInsertID
-* Added createInsertCommand
-* Added createUpdateCommand
 * Fixed applyLImit to correctly handle all variations of $limit and $offset
 
 
