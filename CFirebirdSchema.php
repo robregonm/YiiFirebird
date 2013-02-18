@@ -75,6 +75,18 @@ class CFirebirdSchema extends CDbSchema
 
         if ($this->findColumns($table)) {
             $this->findConstraints($table);
+
+            if (is_string($table->primaryKey) && isset($this->_sequences[$table->rawName . '.' . $table->primaryKey])) {
+                $table->sequenceName = $this->_sequences[$table->rawName . '.' . $table->primaryKey];
+            } elseif (is_array($table->primaryKey)) {
+                foreach ($table->primaryKey as $pk) {
+                    if (isset($this->_sequences[$table->rawName . '.' . $pk])) {
+                        $table->sequenceName = $this->_sequences[$table->rawName . '.' . $pk];
+                        break;
+                    }
+                }
+            }
+
             return $table;
         }
 
