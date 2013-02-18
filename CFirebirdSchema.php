@@ -18,6 +18,8 @@
  */
 class CFirebirdSchema extends CDbSchema
 {
+    private $_sequences = array();
+
     /**
      * @var array the abstract column types mapped to physical column types.
      * @since 1.1.11
@@ -222,6 +224,9 @@ class CFirebirdSchema extends CDbSchema
 
         foreach ($columns as $column) {
             $c = $this->createColumn($column);
+            if ($c->autoIncrement) {
+                $this->_sequences[$table->rawName . '.' . $c->name] = $table->rawName . '.' . $c->name;
+            }
             $table->columns[$c->name] = $c;
             if ($c->isPrimaryKey) {
                 if ($table->primaryKey === null)
@@ -469,4 +474,3 @@ class CFirebirdSchema extends CDbSchema
     }
 
 }
-
