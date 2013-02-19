@@ -24,22 +24,13 @@ class CFirebirdColumnSchema extends CDbColumnSchema
     protected function extractType($dbType)
     {
         // @todo Need to handle more data types here.
-        if (stripos($dbType, 'int') !== false && stripos($dbType, 'unsigned int') === false) {
+        //Types timestamp, date, time, text, blob are string in PHP
+        if (stripos($dbType, 'int') !== false || stripos($dbType, 'quad') !== false) {
             $this->type = 'integer';
         } elseif (stripos($dbType, 'bool') !== false) {
             $this->type = 'boolean';
         } elseif (preg_match('/(numeric|decimal|floa|doub)/i', $dbType)) {
             $this->type = 'double';
-        } elseif (stripos($dbType, 'timestamp') !== false) {
-            $this->type = 'timestamp';
-        } elseif (stripos($dbType, 'date') !== false) {
-            $this->type = 'date';
-        } elseif (stripos($dbType, 'time') !== false) {
-            $this->type = 'time';
-        } elseif (stripos($dbType, 'text') !== false) {
-            $this->type = 'text';
-        } elseif (stripos($dbType, 'blob') !== false) {
-            $this->type = 'binary';
         } else {
             $this->type = 'string';
         }
@@ -52,8 +43,6 @@ class CFirebirdColumnSchema extends CDbColumnSchema
      */
     protected function extractDefault($defaultValue)
     {
-        $defaultValue = strtoupper($defaultValue);
-
         /*
          * handle CURRENT_DATE/TIME/TIMESTAMP with optional precision
          * @todo handle context variable 'NOW'
