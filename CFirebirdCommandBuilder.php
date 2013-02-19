@@ -15,6 +15,27 @@
  */
 class CFirebirdCommandBuilder extends CDbCommandBuilder
 {
+    /**
+     *
+     * @var CDbCommand 
+     */
+    private $_command = null;
+
+    /**
+     * Returns the last insertion ID for the specified table.
+     * @param mixed $table the table schema ({@link CDbTableSchema}) or the table name (string).
+     * @return mixed last insertion id. Null is returned if no sequence name.
+     */
+    public function getLastInsertID($table)
+    {
+        if ($this->_command !== null) {
+            $lastId = $this->_command->pdoStatement->fetchColumn();
+            if ($lastId !== false) {
+                return $lastId;
+            }
+        }
+        return null;
+    }
 
     /**
      * Alters the SQL to apply LIMIT and OFFSET.
@@ -81,6 +102,60 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
         // If we have fallen through the cracks then just pass
         // the sql back.
         return $sql;
+    }
+
+    /**
+     * Creates an INSERT command.
+     * @param mixed $table the table schema ({@link CDbTableSchema}) or the table name (string).
+     * @param array $data data to be inserted (column name=>column value). If a key is not a valid column name, the corresponding value will be ignored.
+     * @return CDbCommand insert command
+     */
+    public function createInsertCommand($table, $data)
+    {
+        $this->ensureTable($table);
+        $fields = array();
+        $values = array();
+        $placeholders = array();
+        $i = 0;
+        foreach ($data as $name => $value) {
+            if (($column = $table->getColumn($name)) !== null && ($value !== null || $column->allowNull)) {
+                $fields[] = $column->rawName;
+                if ($value instanceof CDbExpression) {
+                    $placeholders[] = $value->expression;
+                    foreach ($value->params as $n => $v)
+                        $values[$n] = $v;
+                } else {
+                    $placeholders[] = self::PARAM_PREFIX . $i;
+                    $values[self::PARAM_PREFIX . $i] = $column->typecast($value);
+                    $i++;
+                }
+            }
+        }
+        if ($fields === array()) {
+            $pks = is_array($table->primaryKey) ? $table->primaryKey : array($table->primaryKey);
+            foreach ($pks as $pk) {
+                $fields[] = $table->getColumn($pk)->rawName;
+                $placeholders[] = 'NULL';
+            }
+        }
+
+        $sql = "INSERT INTO {$table->rawName} (" . implode(', ', $fields) . ') VALUES (' . implode(', ', $placeholders) . ')';
+
+        if (is_string($table->primaryKey) && ($column = $table->getColumn($table->primaryKey)) !== null && $column->type !== 'string') {
+            $sql.=' RETURNING ' . $column->rawName;
+            $command = $this->getDbConnection()->createCommand($sql);
+            $table->sequenceName = $column->rawName;
+        } else {
+            $command = $this->getDbConnection()->createCommand($sql);
+        }
+
+        foreach ($values as $name => $value) {
+            $command->bindValue($name, $value);
+        }
+
+        $this->_command = $command;
+
+        return $command;
     }
 
 }
