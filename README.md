@@ -42,6 +42,7 @@ Summary of new features and fixes
 
 ####FirebirdCommandBuilder
 * Fixed applyLImit to correctly handle all variations of $limit and $offset
+* Fixed getLastInsertID for inserting records
 
 
 Installation
