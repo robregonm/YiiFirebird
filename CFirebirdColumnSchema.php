@@ -55,22 +55,12 @@ class CFirebirdColumnSchema extends CDbColumnSchema
         $defaultValue = strtoupper($defaultValue);
 
         /*
-         * remove values from date/time columns with context variable
-         * as the DB should set these values when saving them
+         * handle CURRENT_DATE/TIME/TIMESTAMP with optional precision
+         * @todo handle context variable 'NOW'
+         * ref. http://www.firebirdsql.org/refdocs/langrefupd25-variables.html
          */
-        if($this->type === 'date' or $this->type === 'time') {
-
-            /*
-             * handle CURRENT_DATE/TIME/TIMESTAMP with optional precision
-             * @todo handle context variable 'NOW'
-             * ref. http://www.firebirdsql.org/refdocs/langrefupd25-variables.html
-             */
-            if(strpos($defaultValue, 'CURRENT_DATE') === 0 or
-               strpos($defaultValue, 'CURRENT_TIME') === 0 or
-               in_array($defaultValue, array('NULL', 'TODAY', 'TOMORROW', 'YESTERDAY'))) {
-                $this->defaultValue = null;
-            }
-
+        if (preg_match('/(CURRENT_|NULL|TODAY|TOMORROW|YESTERDAY)/i', $defaultValue)) {
+            $this->defaultValue = null;
         } elseif ($defaultValue == "''") {
             $this->defaultValue = '';
         } else {
