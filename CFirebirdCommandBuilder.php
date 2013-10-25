@@ -123,10 +123,10 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
                 if ($value instanceof CDbExpression) {
                     $placeholders[] = $value->expression;
                     foreach ($value->params as $n => $v)
-                        $values[$n] = $v;
+                        $values[$n] = array('column' => $column, 'value' => $v);
                 } else {
                     $placeholders[] = self::PARAM_PREFIX . $i;
-                    $values[self::PARAM_PREFIX . $i] = $column->typecast($value);
+                    $values[self::PARAM_PREFIX . $i] = array('column' => $column, 'value' => $column->typecast($value));
                     $i++;
                 }
             }
@@ -150,10 +150,64 @@ class CFirebirdCommandBuilder extends CDbCommandBuilder
         }
 
         foreach ($values as $name => $value) {
-            $command->bindValue($name, $value);
+            if (($value['column']->dbType == 'BLOB') || ($value['column']->dbType == 'TEXT'))
+                $command->bindParam($name, $value['value']);
+            else
+                $command->bindValue($name, $value['value']);
         }
 
         $this->_command = $command;
+
+        return $command;
+    }
+
+    /**
+     * Creates an UPDATE command.
+     * @param mixed $table the table schema ({@link CDbTableSchema}) or the table name (string).
+     * @param array $data list of columns to be updated (name=>value)
+     * @param CDbCriteria $criteria the query criteria
+     * @return CDbCommand update command.
+     */
+    public function createUpdateCommand($table, $data, $criteria) {
+        $this->ensureTable($table);
+        $fields = array();
+        $values = array();
+        $bindByPosition = isset($criteria->params[0]);
+        $i = 0;
+        foreach ($data as $name => $value) {
+            if (($column = $table->getColumn($name)) !== null) {
+                if ($value instanceof CDbExpression) {
+                    $fields[] = $column->rawName . '=' . $value->expression;
+                    foreach ($value->params as $n => $v)
+                        $values[$n] = array('column' => $column, 'value' => $v);
+                } else if ($bindByPosition) {
+                    $fields[] = $column->rawName . '=?';
+                    $values[] = array('column' => $column, 'value' => $column->typecast($value));
+                } else {
+                    $fields[] = $column->rawName . '=' . self::PARAM_PREFIX . $i;
+                    $values[self::PARAM_PREFIX . $i] = array('column' => $column, 'value' => $column->typecast($value));
+                    $i++;
+                }
+            }
+        }
+        if ($fields === array())
+            throw new CDbException(Yii::t('yii', 'No columns are being updated for table "{table}".', array('{table}' => $table->name)));
+        $sql = "UPDATE {$table->rawName} SET " . implode(', ', $fields);
+        $sql = $this->applyJoin($sql, $criteria->join);
+        $sql = $this->applyCondition($sql, $criteria->condition);
+        $sql = $this->applyOrder($sql, $criteria->order);
+        $sql = $this->applyLimit($sql, $criteria->limit, $criteria->offset);
+
+        $command = $this->getDbConnection()->createCommand($sql);
+
+        foreach ($values as $name => $value) {
+            if (($value['column']->dbType == 'BLOB') || ($value['column']->dbType == 'TEXT'))
+                $command->bindParam($name, $value['value']);
+            else
+                $command->bindValue($name, $value['value']);
+        }
+        foreach ($criteria->params as $name => $value)
+            $this->bindValue($name, $value);
 
         return $command;
     }
